@@ -68,10 +68,10 @@ var ZigzagSim = function(args) {
     for (var i = 0; i < this.numParticles; i++) {
         var r;
         var c;
-        //do {
-            r = randInt(0, this.numRows);
-            c = randInt(0, this.numCols);
-        //} while (this.matrix[r][c] != null);
+        do {
+            r = randInt(this.numRows);
+            c = randInt(this.numCols);
+        } while (this.matrix[r][c] != null);
 
         var direction = randDirection();
 
