@@ -1,0 +1,189 @@
+main {
+    padding-bottom: 100px;
+}
+body {
+    color: #333;
+    line-height: 140%;
+    font-family: "Times New Roman";
+    font-size: 12pt;
+}
+
+button {
+    font-family: "Helvetica";
+    border: rgba(0,0,0,0.2) solid 1px !important;
+}
+
+.caption {
+    font-size: 10pt;
+    text-align: center;
+}
+
+.illustration {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.alien {
+    font-size: 60px;
+    color: #f45042;
+    padding-bottom: 20px;
+    font-family: 'Satisfy', cursive;
+}
+
+.canvas_container {
+    width: 700px;
+    margin: 0 auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.zz-canvas {
+    clear: left;
+    border: 1px solid #444;
+}
+
+.svg_window {
+    border: 1px solid #aaa;
+    border-radius: 8px;   
+    background-color: #fff;
+}
+
+.subtitle {
+    font-size: 25px;
+    padding-bottom: 20px;
+    padding-top: 0px;
+    text-align: center;
+}
+
+.author {
+    text-align: center;
+    padding-top: 0px;
+}
+
+.block {
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+
+.quote {
+    font-style: italic;
+}
+
+.quote-author {
+    padding-top: 10px;
+    padding-bottom: 20px;
+    text-align: right;
+}
+
+.part-title {
+    padding-top: 150px;
+}
+
+h1 {
+    font: 42px "Helvetica";
+    font-weight: bold;
+    width: 700px;
+    margin: 0 auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    text-align: center;
+}
+
+h2 {
+    font: 33px "Helvetica";
+    font-weight: bold;
+    width: 700px;
+    margin: 0 auto;
+    padding-bottom: 5px;
+    padding-top: 100px;
+}
+
+h3 {
+
+    font: 18px "Helvetica";
+
+    font-size: 20px;
+    font-weight: bold;
+    width: 700px;
+    margin: 0 auto;
+    padding-top: 50px;
+    padding-bottom: 5px
+}
+
+h4 {
+
+    font: 14px "Helvetica";
+
+    font-size: 14px;
+    font-weight: bold;
+    width: 700px;
+    margin: 0 auto;
+    padding-top: 30px;
+    padding-bottom: 5px
+}
+
+
+.spacing {
+    padding-bottom: 30px;
+}
+
+.super-spacing {
+    padding-bottom: 800px;
+}
+
+li {
+    padding-bottom: 5px;
+}
+
+ul {
+    width: 670px;
+    margin: 0 auto;
+    padding-top: 15px;
+    padding-bottom:0px;
+}
+
+ol {
+    width: 670px;
+    margin: 0 auto;
+    padding-top: 15px;
+    padding-bottom:0px;
+}
+
+img {
+    padding-right: 10px;
+    cursor: pointer;
+}
+
+p {
+    font: 18px , "Times New Roman";
+    width: 700px;
+    margin: 0 auto;
+    padding-top: 10px;
+}
+
+/* http://mrmrs.io/links/ */
+a {
+  transition: color .4s;
+  color: #398bc6;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a:link,
+a:visited { color: #398bc6; }
+a:hover   {
+    color: #7FDBFF;
+    text-decoration: underline;
+}
+a:active  {
+  transition: color .3s;
+  color: #007BE6;
+}
+
+.link { text-decoration: none; }
+
+a[name] {
+    color: #000;
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Zigzag</title>
+        <link rel="stylesheet" href="style/bootstrap.min.css" />
+        <link rel="stylesheet" href="style/style.css" />
+        <meta charset="utf-8" />
+        <script type="text/javascript" src="./js/jquery-2.2.4.min.js"></script>
+        <script type="text/javascript" src="./js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="./js/easeljs-0.8.2.min.js"></script>
+        <script type="text/javascript" src="./js/zigzag.js"></script>
+
+    </head>
+    <body>
+        <main>
+            <h1 style="text-align: center">Zigzag</h1>
+            <br><br>
+            <center>Michael N. Gagnon, 2019</center>
+
+            <h2>Simulation</h2>
+            <div id="zz1" class="canvas_container"></div>
+            <script>
+                new ZigzagSimViz({
+                    simId: "zz1",
+                    numRows: 10,
+                    numCols: 5,
+                    numParticles: 5,
+                    width: 700,
+                    height: 300
+                });
+            </script>
+        </main>
+    </body>
+</html>
