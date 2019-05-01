@@ -267,7 +267,7 @@ var ZigzagViz = function(args) {
 
     this.cells = this.drawCells();
 
-    this.drawGrid();
+    //this.drawGrid();
 }
 
 function retina(value) {
