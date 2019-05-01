@@ -410,4 +410,12 @@ ZigzagSimViz.prototype.eventTick = function(event) {
     this.viz.update(this.simulator);
 }
 
+// Group particles into clusters
+// Given we have N clusters, and given the size of each cluster, what's
+// the probability that we will have M clusters, with specific sizes for each of the
+// M clusters?
+
+// For a specific cluster of size X, where Y is the sum size of all other clusters
+// What's the probability it will grow/shrink by Z
+
 
