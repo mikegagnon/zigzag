@@ -122,6 +122,7 @@ var Particle = function(sim, r, c, direction) {
     this.col = c;
     this.direction = direction;
     this.instructionPointer = 0;
+    this.numCollisions = 0;
 
     this.program = [
         P_MOVE,
@@ -144,6 +145,17 @@ Particle.prototype.step = function() {
             this.sim.matrix[r][c] = this;
             this.row = r;
             this.col = c;
+        } else {
+            this.numCollisions += 1;
+
+            // TODO: configurable
+            if (this.numCollisions == 100) {
+                this.numCollisions = 0;
+                this.direction = ROTATE_LEFT[this.direction];
+                this.instructionPointer = 0;
+                return;
+
+            }
         }
 
     } else if (instruction == P_TURN_LEFT) {
