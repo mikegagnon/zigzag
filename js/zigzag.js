@@ -252,14 +252,16 @@ ZigzagSim.prototype.step = function() {
     for (var i = 0; i < this.numParticles; i++) {
         this.particles[i].step(this);
     }
+}
 
-    // TODO: configurable to turn this off
+var ZigzagGrouping = function(sim) {
+    this.sim = sim;
     this.assignGroups();
 }
 
-ZigzagSim.prototype.assignGroups = function() {
-    for (var i = 0; i < this.numParticles; i++) {
-        this.particles[i].groupNum = undefined;
+ZigzagGrouping.prototype.assignGroups = function() {
+    for (var i = 0; i < this.sim.numParticles; i++) {
+        this.sim.particles[i].groupNum = undefined;
     }
 
     this.nextGroupNum = 0;
@@ -267,14 +269,14 @@ ZigzagSim.prototype.assignGroups = function() {
     // this.groups[groupNum] = set(particle ids that are members of this group)
     this.groups = {};
 
-    for (var i = 0; i < this.numParticles; i++) {
-        this.assignToGroup(this.particles[i]);
+    for (var i = 0; i < this.sim.numParticles; i++) {
+        this.assignToGroup(this.sim.particles[i]);
     }
 
     console.log(this.groups);
 }
 
-ZigzagSim.prototype.assignToGroup = function(particle, groupNum) {
+ZigzagGrouping.prototype.assignToGroup = function(particle, groupNum) {
     if (particle.groupNum !== undefined) {
         return;
     }
@@ -300,7 +302,7 @@ ZigzagSim.prototype.assignToGroup = function(particle, groupNum) {
         var row = rc.row;
         var col = rc.col;
 
-        var p = this.matrix[row][col];
+        var p = this.sim.matrix[row][col];
 
         if (p != null) {
             this.assignToGroup(p, particle.groupNum);
@@ -462,6 +464,7 @@ var ZigzagSimViz = function(args) {
 ZigzagSimViz.prototype.eventTick = function(event) {
     for (var i = 0; i < this.stepsPerTick; i++) {
         this.simulator.step();
+        var grouping = new ZigzagGrouping(this.simulator);
     }
 
     this.viz.update(this.simulator);
