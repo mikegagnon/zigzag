@@ -93,7 +93,7 @@ var COLOR_WHITE = "white";
 
 var GRID_STROKE = "#ccc";
 
-var FPS = 60;
+var FPS = 1;
 
 P_MOVE = 0;
 P_TURN_LEFT = 1;
@@ -259,6 +259,7 @@ var ZigzagGrouping = function(sim) {
 
     // this.groups[groupId] = set(particle ids that are members of this group)
     this.groups = {};
+    this.colors = {};
     this.assignGroups();
 }
 
@@ -308,7 +309,8 @@ ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
         }
     }
 
-    var groups = {}
+    var groups = {};
+    var colors = {};
 
     for (var j = 0; j < previousGroupIds.length; j++) {
         var previousGroupId = previousGroupIds[j];
@@ -326,6 +328,14 @@ ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
             // magic happens here
             if (maxChildGroupId !== undefined) {
                 groups[previousGroupId] = this.groups[maxChildGroupId];
+                var color;
+                if (this.colors[maxChildGroupId] === undefined) {
+                    var hue = randInt(360);
+                    color = `hsl(${hue}, 100%, 64%)`;
+                } else {
+                    color = this.colors[maxChildGroupId];
+                }
+                colors[previousGroupId] = color; 
             }
 
             // and here
@@ -333,6 +343,8 @@ ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
                 var currentGroupId = currentGroupIds[k];
                 if (maxChildGroupId != currentGroupId) {
                     groups[currentGroupId] = this.groups[currentGroupId];
+                    var hue = randInt(360);
+                    colors[currentGroupId] = `hsl(${hue}, 100%, 64%)`;
                 }
             }
         }
@@ -342,10 +354,13 @@ ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
     for (var i = 0; i < orphans.length; i++) {
         var orphanGroupId = orphans[i];
         groups[orphanGroupId] = this.groups[orphanGroupId];
+        var hue = randInt(360);
+        colors[currentGroupId] = `hsl(${hue}, 100%, 64%)`;
     }
 
     return {
-        groups: groups
+        groups: groups,
+        colors: colors
     };
 }
 
@@ -367,6 +382,8 @@ ZigzagGrouping.prototype.assignToGroup = function(particle, groupId) {
     if (groupId === undefined) {
         groupId = randInt(Number.MAX_SAFE_INTEGER);
         this.groups[groupId] = new Set();
+        var hue = randInt(360);
+        this.colors[groupId] = `hsl(${hue}, 100%, 64%)`;
     }
     
     this.groups[groupId].add(particle.id);
@@ -511,18 +528,21 @@ ZigzagViz.prototype.drawLine = function(x1, y1, x2, y2, color) {
     this.stage.addChild(line);
 }
 
-ZigzagViz.prototype.update = function(sim) {
+ZigzagViz.prototype.update = function(sim, grouping) {
     for (var r = 0; r < this.numRows; r++) {
         for (var c = 0; c < this.numCols; c++) {
             var cell = this.cells[r][c];
             var simState = sim.matrix[r][c] == null ? STATE_OFF : STATE_ON;
-            if (simState != cell.state) {
+            //if (simState != cell.state) {
                 cell.state = simState;
-                var color = simState == STATE_OFF ? COLOR_WHITE : COLOR_RED;
+                var color = simState == STATE_OFF ? COLOR_WHITE : grouping.colors[sim.matrix[r][c].groupId];
+                if (color === undefined) {
+                    color = "black"; //console.log(1);
+                }
                 var x = c * this.cellWidth;
                 var y = r * this.cellHeight;
                 cell.shape.graphics.clear().beginFill(color).drawRect(x, y, this.cellWidth, this.cellHeight).endFill();
-            }
+            //}
         }
     }
     this.stage.update();
@@ -542,7 +562,7 @@ var ZigzagSimViz = function(args) {
 
     this.viz = new ZigzagViz(args);
 
-    this.viz.update(this.simulator);
+    this.viz.update(this.simulator, this.grouping);
 };
 
 
@@ -553,7 +573,7 @@ ZigzagSimViz.prototype.eventTick = function(event) {
         this.grouping = grouping.reconcile(this.grouping);
     }
 
-    this.viz.update(this.simulator);
+    this.viz.update(this.simulator, this.grouping);
 }
 
 
