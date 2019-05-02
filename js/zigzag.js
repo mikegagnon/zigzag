@@ -93,7 +93,7 @@ var COLOR_WHITE = "white";
 
 var GRID_STROKE = "#ccc";
 
-var FPS = 1;
+var FPS = 10;
 
 P_MOVE = 0;
 P_TURN_LEFT = 1;
@@ -386,7 +386,6 @@ ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
         colors[orphanGroupId] = `hsl(${hue}, 100%, 64%)`;
         count++;
     }
-    console.log(count);
 
     return {
         groups: groups,
