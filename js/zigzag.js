@@ -270,6 +270,8 @@ function setIntersection(a, b) {
 
 ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
 
+    var count = 0;
+
     // childrenOf[previousGroupId] = list of currentGroupIds for the groups
     // that are descendants of the group indexed by previousGroupId
     var childrenOf = {};
@@ -329,13 +331,38 @@ ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
             if (maxChildGroupId !== undefined) {
                 groups[previousGroupId] = this.groups[maxChildGroupId];
                 var color;
-                if (this.colors[maxChildGroupId] === undefined) {
+                //if (this.colors[maxChildGroupId] === undefined) {
+                //    var hue = randInt(360);
+                //    color = `hsl(${hue}, 100%, 64%)`;
+                //} else {
+                //    color = this.colors[maxChildGroupId];
+                //}
+                //color = previousGrouping.colors[previousGroupId];
+                
+
+                /*if (previousGrouping.colors[previousGroupId] === undefined) {
                     var hue = randInt(360);
                     color = `hsl(${hue}, 100%, 64%)`;
                 } else {
-                    color = this.colors[maxChildGroupId];
+                    color = previousGrouping.colors[previousGroupId];
+                }*/
+                
+                color = previousGrouping.colors[previousGroupId];
+
+                if (color === undefined) {
+                    console.log(1);
                 }
-                colors[previousGroupId] = color; 
+                
+                colors[previousGroupId] = color;
+
+                var particleIds = [...groups[previousGroupId]];
+                for (var k = 0; k < particleIds.length; k++) {
+                    var pid = particleIds[k];
+                    this.sim.particles[pid].groupId = previousGroupId;
+                }
+
+                //console.log(1);
+                count++;
             }
 
             // and here
@@ -345,6 +372,7 @@ ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
                     groups[currentGroupId] = this.groups[currentGroupId];
                     var hue = randInt(360);
                     colors[currentGroupId] = `hsl(${hue}, 100%, 64%)`;
+                    count++;
                 }
             }
         }
@@ -355,13 +383,16 @@ ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
         var orphanGroupId = orphans[i];
         groups[orphanGroupId] = this.groups[orphanGroupId];
         var hue = randInt(360);
-        colors[currentGroupId] = `hsl(${hue}, 100%, 64%)`;
+        colors[orphanGroupId] = `hsl(${hue}, 100%, 64%)`;
+        count++;
     }
+    console.log(count);
 
     return {
         groups: groups,
         colors: colors
     };
+
 }
 
 ZigzagGrouping.prototype.assignGroups = function() {
