@@ -256,7 +256,70 @@ ZigzagSim.prototype.step = function() {
 
 var ZigzagGrouping = function(sim) {
     this.sim = sim;
+    this.nextGroupNum = 0;
+    // this.groups[groupNum] = set(particle ids that are members of this group)
+    this.groups = {};
     this.assignGroups();
+}
+
+// TODO: JS backwards compat
+function setIntersection(a, b) {
+    return new Set([...a].filter(x => b.has(x)));
+}
+
+ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
+
+    var childrenOf = {};
+    for (var j = 0; j < previousGrouping.nextGroupNum; j++) {
+        childrenOf[j] = [];
+    }
+
+    var orphans = [];
+
+    for (var i = 0; i < this.nextGroupNum; i++) {
+        var currentGroup = this.groups[i];
+        var foundParent = false;
+        for (var j = 0; j < previousGrouping.nextGroupNum; j++) {
+            var previousGroup = previousGrouping.groups[j];
+            var intersection = setIntersection(currentGroup, previousGroup);
+            // TODO: configurable proportion?
+            if (intersection.size / currentGroup.size > 0.5) {
+                childrenOf[j].push(i);
+                foundParent = true;
+                break;
+            }
+        }
+
+        if (!foundParent) {
+            orphans.push(i);
+        }
+    }
+
+    // mapping[i] = j
+    /*var mapping = {};
+
+    console.log("previous")
+    console.log(previousGrouping.groups)
+    console.log("current")
+    console.log(this.groups)
+
+    for (var j = 0; j < previousGrouping.nextGroupNum; j++) {
+        var children = childrenOf[j]
+        var maxChild = undefined;
+        for (var k = 0; k < children.length; k++) {
+            var child = children[k];
+            if (maxChild === undefined || this.groups[child].size > this.groups[maxChild].size) {
+                maxChild = child;
+            }
+        }
+
+        mapping[child] = j;
+        console.log(`The old group ${j} maps to the new group ${child}`);
+    }*/
+
+    //groups = {};
+        //for (var i = 0; i < this.nextGroupNum; i++) {
+    return this;
 }
 
 ZigzagGrouping.prototype.assignGroups = function() {
@@ -264,10 +327,8 @@ ZigzagGrouping.prototype.assignGroups = function() {
         this.sim.particles[i].groupNum = undefined;
     }
 
-    this.nextGroupNum = 0;
 
-    // this.groups[groupNum] = set(particle ids that are members of this group)
-    this.groups = {};
+
 
     for (var i = 0; i < this.sim.numParticles; i++) {
         this.assignToGroup(this.sim.particles[i]);
@@ -282,9 +343,11 @@ ZigzagGrouping.prototype.assignToGroup = function(particle, groupNum) {
     }
 
     if (groupNum === undefined) {
-        //this.groupSize[this.nextGroupNum] = 1;
         this.groups[this.nextGroupNum] = new Set([particle.id]);
+
+        // The abstraction violation here seems worth it
         particle.groupNum = this.nextGroupNum;
+
         this.nextGroupNum++;
     } else {
         this.groups[groupNum].add(particle.id);
@@ -455,6 +518,8 @@ var ZigzagSimViz = function(args) {
     this.stepsPerTick = args.stepsPerTick;
 
     this.simulator = new ZigzagSim(args);
+    this.grouping = new ZigzagGrouping(this.simulator);
+
     this.viz = new ZigzagViz(args);
 
     this.viz.update(this.simulator);
@@ -465,6 +530,7 @@ ZigzagSimViz.prototype.eventTick = function(event) {
     for (var i = 0; i < this.stepsPerTick; i++) {
         this.simulator.step();
         var grouping = new ZigzagGrouping(this.simulator);
+        this.grouping = grouping.reconcile(this.grouping);
     }
 
     this.viz.update(this.simulator);
