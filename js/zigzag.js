@@ -88,8 +88,8 @@ var RIGHT = 3;
 var STATE_OFF = 0;
 var STATE_ON = 1;
 
-var COLOR_RED = "#f45042"
-var COLOR_WHITE = "white"
+var COLOR_RED = "hsl(0, 100%, 64%)"; //"#f45042";
+var COLOR_WHITE = "white";
 
 var GRID_STROKE = "#ccc";
 
@@ -256,8 +256,8 @@ ZigzagSim.prototype.step = function() {
 
 var ZigzagGrouping = function(sim) {
     this.sim = sim;
-    this.nextGroupNum = 0;
-    // this.groups[groupNum] = set(particle ids that are members of this group)
+
+    // this.groups[groupId] = set(particle ids that are members of this group)
     this.groups = {};
     this.assignGroups();
 }
@@ -269,90 +269,110 @@ function setIntersection(a, b) {
 
 ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
 
+    // childrenOf[previousGroupId] = list of currentGroupIds for the groups
+    // that are descendants of the group indexed by previousGroupId
     var childrenOf = {};
-    for (var j = 0; j < previousGrouping.nextGroupNum; j++) {
-        childrenOf[j] = [];
+
+    var previousGroupIds = Object.keys(previousGrouping.groups);
+    for (var j = 0; j < previousGroupIds.length; j++) {
+        var previousGroupId = previousGroupIds[j];
+        childrenOf[previousGroupId] = [];
     }
 
+    // list of list of currentGroupIds for the groups that are not contained in
+    // childrenOf
     var orphans = [];
 
-    for (var i = 0; i < this.nextGroupNum; i++) {
-        var currentGroup = this.groups[i];
+    //for (var i = 0; i < this.nextGroupNum; i++) {
+    var currentGroupIds = Object.keys(this.groups);
+    for (var i = 0; i < currentGroupIds.length; i++) {
+        
+        var currentGroupId = currentGroupIds[i];
+        var currentGroup = this.groups[currentGroupId];
         var foundParent = false;
-        for (var j = 0; j < previousGrouping.nextGroupNum; j++) {
-            var previousGroup = previousGrouping.groups[j];
+
+        for (var j = 0; j < previousGroupIds.length; j++) {
+            var previousGroupId = previousGroupIds[j];
+            var previousGroup = previousGrouping.groups[previousGroupId];
             var intersection = setIntersection(currentGroup, previousGroup);
             // TODO: configurable proportion?
             if (intersection.size / currentGroup.size > 0.5) {
-                childrenOf[j].push(i);
+                childrenOf[previousGroupId].push(currentGroupId);
                 foundParent = true;
                 break;
             }
         }
 
         if (!foundParent) {
-            orphans.push(i);
+            orphans.push(currentGroupId);
         }
     }
 
-    // mapping[i] = j
-    /*var mapping = {};
+    var groups = {}
 
-    console.log("previous")
-    console.log(previousGrouping.groups)
-    console.log("current")
-    console.log(this.groups)
+    for (var j = 0; j < previousGroupIds.length; j++) {
+        var previousGroupId = previousGroupIds[j];
+        if (previousGroupId in childrenOf) {
+            var currentGroupIds = childrenOf[previousGroupId];
+            var maxChildGroupId = undefined;
 
-    for (var j = 0; j < previousGrouping.nextGroupNum; j++) {
-        var children = childrenOf[j]
-        var maxChild = undefined;
-        for (var k = 0; k < children.length; k++) {
-            var child = children[k];
-            if (maxChild === undefined || this.groups[child].size > this.groups[maxChild].size) {
-                maxChild = child;
+            for (var k = 0; k < currentGroupIds.length; k++) {
+                var currentGroupId = currentGroupIds[k];
+                if (maxChildGroupId === undefined || this.groups[currentGroupId].size > this.groups[maxChildGroupId].size) {
+                    maxChildGroupId = currentGroupId;
+                }
+            }
+
+            // magic happens here
+            if (maxChildGroupId !== undefined) {
+                groups[previousGroupId] = this.groups[maxChildGroupId];
+            }
+
+            // and here
+            for (var k = 0; k < currentGroupIds.length; k++) {
+                var currentGroupId = currentGroupIds[k];
+                if (maxChildGroupId != currentGroupId) {
+                    groups[currentGroupId] = this.groups[currentGroupId];
+                }
             }
         }
+    }
 
-        mapping[child] = j;
-        console.log(`The old group ${j} maps to the new group ${child}`);
-    }*/
+    // and here
+    for (var i = 0; i < orphans.length; i++) {
+        var orphanGroupId = orphans[i];
+        groups[orphanGroupId] = this.groups[orphanGroupId];
+    }
 
-    //groups = {};
-        //for (var i = 0; i < this.nextGroupNum; i++) {
-    return this;
+    return {
+        groups: groups
+    };
 }
 
 ZigzagGrouping.prototype.assignGroups = function() {
     for (var i = 0; i < this.sim.numParticles; i++) {
-        this.sim.particles[i].groupNum = undefined;
+        this.sim.particles[i].groupId = undefined;
     }
-
-
-
 
     for (var i = 0; i < this.sim.numParticles; i++) {
         this.assignToGroup(this.sim.particles[i]);
     }
-
-    console.log(this.groups);
 }
 
-ZigzagGrouping.prototype.assignToGroup = function(particle, groupNum) {
-    if (particle.groupNum !== undefined) {
+ZigzagGrouping.prototype.assignToGroup = function(particle, groupId) {
+    if (particle.groupId !== undefined) {
         return;
     }
 
-    if (groupNum === undefined) {
-        this.groups[this.nextGroupNum] = new Set([particle.id]);
-
-        // The abstraction violation here seems worth it
-        particle.groupNum = this.nextGroupNum;
-
-        this.nextGroupNum++;
-    } else {
-        this.groups[groupNum].add(particle.id);
-        particle.groupNum = groupNum;
+    if (groupId === undefined) {
+        groupId = randInt(Number.MAX_SAFE_INTEGER);
+        this.groups[groupId] = new Set();
     }
+    
+    this.groups[groupId].add(particle.id);
+
+    // The abstraction violation here seems worth it
+    particle.groupId = groupId;
 
     var rcs = [
         particle.dirRowCol(UP, particle.row, particle.col),
@@ -368,7 +388,7 @@ ZigzagGrouping.prototype.assignToGroup = function(particle, groupNum) {
         var p = this.sim.matrix[row][col];
 
         if (p != null) {
-            this.assignToGroup(p, particle.groupNum);
+            this.assignToGroup(p, particle.groupId);
         }
     }
 
