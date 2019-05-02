@@ -93,7 +93,7 @@ var COLOR_WHITE = "white"
 
 var GRID_STROKE = "#ccc";
 
-var FPS = 30;
+var FPS = 60;
 
 P_MOVE = 0;
 P_TURN_LEFT = 1;
@@ -116,8 +116,9 @@ var ROTATE_RIGHT = {
 
 
 
-var Particle = function(sim, r, c, direction) {
+var Particle = function(sim, id, r, c, direction) {
     this.sim = sim;
+    this.id = id;
     this.row = r;
     this.col = c;
     this.direction = direction;
@@ -152,6 +153,7 @@ Particle.prototype.step = function() {
             if (this.numCollisions == 100) {
                 this.numCollisions = 0;
                 this.direction = ROTATE_LEFT[this.direction];
+                // TODO: configurable alternate turning mechanisms
                 this.instructionPointer = 0;
                 return;
 
@@ -240,7 +242,7 @@ var ZigzagSim = function(args) {
             c = randInt(this.numCols);
         } while (this.matrix[r][c] != null);
         var direction = randDirection();
-        var p = new Particle(this, r, c, direction);
+        var p = new Particle(this, i, r, c, direction);
         this.matrix[r][c] = p;
         this.particles.push(p);
     }
@@ -250,6 +252,61 @@ ZigzagSim.prototype.step = function() {
     for (var i = 0; i < this.numParticles; i++) {
         this.particles[i].step(this);
     }
+
+    // TODO: configurable to turn this off
+    this.assignGroups();
+}
+
+ZigzagSim.prototype.assignGroups = function() {
+    for (var i = 0; i < this.numParticles; i++) {
+        this.particles[i].groupNum = undefined;
+    }
+
+    this.nextGroupNum = 0;
+
+    // this.groups[groupNum] = set(particle ids that are members of this group)
+    this.groups = {};
+
+    for (var i = 0; i < this.numParticles; i++) {
+        this.assignToGroup(this.particles[i]);
+    }
+
+    console.log(this.groups);
+}
+
+ZigzagSim.prototype.assignToGroup = function(particle, groupNum) {
+    if (particle.groupNum !== undefined) {
+        return;
+    }
+
+    if (groupNum === undefined) {
+        //this.groupSize[this.nextGroupNum] = 1;
+        this.groups[this.nextGroupNum] = new Set([particle.id]);
+        particle.groupNum = this.nextGroupNum;
+        this.nextGroupNum++;
+    } else {
+        this.groups[groupNum].add(particle.id);
+        particle.groupNum = groupNum;
+    }
+
+    var rcs = [
+        particle.dirRowCol(UP, particle.row, particle.col),
+        particle.dirRowCol(DOWN, particle.row, particle.col),
+        particle.dirRowCol(LEFT, particle.row, particle.col),
+        particle.dirRowCol(RIGHT, particle.row, particle.col)];
+
+    for (var i = 0; i < rcs.length; i++) {
+        var rc = rcs[i];
+        var row = rc.row;
+        var col = rc.col;
+
+        var p = this.matrix[row][col];
+
+        if (p != null) {
+            this.assignToGroup(p, particle.groupNum);
+        }
+    }
+
 }
 
 var ZigzagViz = function(args) {
