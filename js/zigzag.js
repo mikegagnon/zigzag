@@ -18,9 +18,9 @@ function clickReset(id) {
     instances[id].clickReset();
 }
 
-function eventTick(id) {
-    instances[id].eventTick();
-}
+//function eventTick(id) {
+//    instances[id].eventTick();
+//}
 
 function initializeTicker() {
     createjs.Ticker.addEventListener("tick", tick)
@@ -41,7 +41,7 @@ function tick(event) {
     //val rd = instances(activeInstanceId.get)
     //rd.viz.tick(event)
     //instances[currentInstance].tick(event);
-    eventTick(currentInstance);
+    currentInstance.eventTick();
     return true;
 }
 
@@ -453,8 +453,9 @@ var ZigzagViz = function(args) {
 
     this.canvas = this.addCanvas();
     this.stage = this.addStage();
-
     this.cells = this.drawCells();
+
+    this.addConsole();
 
     //this.drawGrid();
 }
@@ -463,11 +464,23 @@ function retina(value) {
     return value * window.devicePixelRatio;
 }
 
+ZigzagViz.prototype.addConsole = function() {
+    var consoleHtml = `
+        <div id="${this.simId}-console">
+            <button type="button" class="btn btn-danger dark-border" onclick="clickPlayPause('${this.simId}')"><span id="${this.simId}-play-pause-button" class='glyphicon glyphicon-play'></span></button>
+            <button type="button" class="btn dark-border" onclick="clickStep('${this.lifeId}')"><span class='glyphicon glyphicon-step-forward'></span></button>
+            <button type="button" class="btn dark-border" onclick="clickFast('${this.simId}')"><span id="${this.simId}-fast-button" class='glyphicon glyphicon-forward'></span></button>
+            <button type="button" class="btn dark-border" onclick="clickReset('${this.simId}')">Reset</button>
+        </div>
+    `;
+
+    $("#" + this.simId).append(consoleHtml);
+}
+
 ZigzagViz.prototype.addStage = function() {
     var stage = new createjs.Stage(this.canvasId);
     stage.regX = -0.5;
     stage.regY = -0.5;
-    stage.enableMouseOver();
     return stage;
 };
 
@@ -582,19 +595,43 @@ var ZigzagSimViz = function(args) {
     this.simId = args.simId;
     instances[this.simId] = this;
 
-    // temporary
-    currentInstance = this.simId;
-
     this.stepsPerTick = args.stepsPerTick;
-
     this.simulator = new ZigzagSim(args);
     this.grouping = new ZigzagGrouping(this.simulator);
-
     this.viz = new ZigzagViz(args);
-
     this.viz.update(this.simulator, this.grouping);
+
+    this.paused = true;
+
+    if (args.play) {
+        this.clickPlayPause();
+    }
 };
 
+ZigzagSimViz.prototype.clickPlayPause = function() {
+    if (this.paused) {
+        // then play
+
+        // pause the current instance
+        if (currentInstance != null) {
+            currentInstance.clickPlayPause();
+        }
+
+        currentInstance = this;
+        this.paused = false;
+        $("#" + this.simId + "-play-pause-button").attr("class", "glyphicon glyphicon-pause");
+
+        createjs.Ticker.paused = false;
+    } else {
+        // then pause
+        
+        this.paused = true;
+        currentInstance = null;
+        createjs.Ticker.paused = true;
+
+        $("#" + this.simId + "-play-pause-button").attr("class", "glyphicon glyphicon-play");
+    }
+};
 
 ZigzagSimViz.prototype.eventTick = function(event) {
     for (var i = 0; i < this.stepsPerTick; i++) {

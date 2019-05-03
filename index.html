@@ -19,6 +19,7 @@
 
             <h2>Simulation</h2>
             <div id="zz1" class="canvas_container"></div>
+            <div id="zz2" class="canvas_container"></div>
             <script>
 
                 var width = 500;
@@ -30,6 +31,18 @@
 
                 new ZigzagSimViz({
                     simId: "zz1",
+                    play: true,
+                    numRows: numRows,
+                    numCols: numCols,
+                    numParticles: numParticles,
+                    width: width,
+                    height: height,
+                    stepsPerTick: stepsPerTick,
+                });
+
+                new ZigzagSimViz({
+                    simId: "zz2",
+                    play: true,
                     numRows: numRows,
                     numCols: numCols,
                     numParticles: numParticles,
