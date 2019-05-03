@@ -8,8 +8,8 @@
         <script type="text/javascript" src="./js/jquery-2.2.4.min.js"></script>
         <script type="text/javascript" src="./js/bootstrap.min.js"></script>
         <script type="text/javascript" src="./js/easeljs-0.8.2.min.js"></script>
+        <!--<script type="text/javascript" src="./js/bitset.js"></script>-->
         <script type="text/javascript" src="./js/zigzag.js"></script>
-
     </head>
     <body>
         <main>
@@ -19,13 +19,12 @@
 
             <h2>Simulation</h2>
             <div id="zz1" class="canvas_container"></div>
-            <div id="zz2" class="canvas_container"></div>
             <script>
 
                 var width = 500;
                 var height = 500;
-                var numRows = Math.floor(0.15 * height);
-                var numCols = Math.floor(0.15 * width);
+                var numRows = Math.floor(0.05 * height);
+                var numCols = Math.floor(0.05 * width);
                 var numParticles = Math.floor(numRows * numCols * 0.35);
                 var stepsPerTick = 1;
 
@@ -40,16 +39,6 @@
                     stepsPerTick: stepsPerTick,
                 });
 
-                new ZigzagSimViz({
-                    simId: "zz2",
-                    play: true,
-                    numRows: numRows,
-                    numCols: numCols,
-                    numParticles: numParticles,
-                    width: width,
-                    height: height,
-                    stepsPerTick: stepsPerTick,
-                });
             </script>
         </main>
     </body>
