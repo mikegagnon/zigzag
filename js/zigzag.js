@@ -286,8 +286,6 @@ var ZigzagGrouping = function(sim) {
 };
 
 ZigzagGrouping.prototype.update = function() {
-    this.assignGroups();
-    this.reconcile();
 
     if (this.current == 0) {
         this.current = 1;
@@ -302,6 +300,9 @@ ZigzagGrouping.prototype.update = function() {
 
     this.prevGroups = this.data[this.prev].groups;
     this.prevColors = this.data[this.prev].colors;
+
+    this.assignGroups();
+    this.reconcile();
 };
 
 // TODO: JS backwards compat
