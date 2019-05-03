@@ -305,9 +305,7 @@ ZigzagGrouping.prototype.update = function() {
     this.reconcile();
 };
 
-// TODO: JS backwards compat
 function setIntersection(a, b) {
-    //return new Set([...a].filter(x => b.has(x)));
     return a.and(b);
 }
 
@@ -360,6 +358,12 @@ ZigzagGrouping.prototype.assignToGroup = function(particle, groupId) {
         if (p != null) {
             this.assignToGroup(p, particle.groupId);
         }
+    }
+
+    if (this.groups[groupId].cardinality() == 1) {
+        this.data[this.current].nextGroupId--;
+        //this.colors[groupId] = undefined;
+        particle.groupId = undefined;
     }
 
 }
@@ -451,7 +455,7 @@ ZigzagGrouping.prototype.reconcile = function() {
                 if (maxChildGroupId != currentGroupId) {
                     //this.groups[currentGroupId] = this.groups[currentGroupId];
                     var hue = randInt(360);
-                    this.colors[currentGroupId] = `hsl(${hue}, 100%, 64%)`;
+                    this.colors[currentGroupId] = "white";//`hsl(${hue}, 100%, 64%)`;
                 }
             }
         }
