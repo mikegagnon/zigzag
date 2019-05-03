@@ -299,7 +299,6 @@ ZigzagGrouping.prototype.update = function() {
 
     this.groups = this.data[this.current].groups;
     this.colors = this.data[this.current].colors;
-    this.data[this.current].nextGroupId = 0;
 
     this.prevGroups = this.data[this.prev].groups;
     this.prevColors = this.data[this.prev].colors;
@@ -312,6 +311,7 @@ function setIntersection(a, b) {
 
 ZigzagGrouping.prototype.assignGroups = function() {
 
+    this.data[this.current].nextGroupId = 0;
 
     for (var i = 0; i < this.sim.numParticles; i++) {
         this.sim.particles[i].groupId = undefined;
@@ -408,12 +408,12 @@ ZigzagGrouping.prototype.reconcile = function() {
 
     for (var j = 0; j < numPreviousGroups; j++) {
         var previousGroupId = j;
-        if (previousGroupId in childrenOf) {
+        if (true) {//(previousGroupId in childrenOf) {
             var currentGroupIds = childrenOf[previousGroupId];
             var maxChildGroupId = undefined;
 
-            for (var k = 0; k < numCurrentGroups; k++) {
-                var currentGroupId = k;
+            for (var k = 0; k < currentGroupIds.length; k++) {
+                var currentGroupId = currentGroupIds[k];
                 if (maxChildGroupId === undefined || this.groups[currentGroupId].size > this.groups[maxChildGroupId].size) {
                     maxChildGroupId = currentGroupId;
                 }
@@ -429,6 +429,9 @@ ZigzagGrouping.prototype.reconcile = function() {
                 if (color === undefined) {
                     console.error("color undefined");
                 }
+
+                //console.log("current", this.groups[maxChildGroupId]);
+                //console.log("prev", this.prevGroups[previousGroupId]);
                 
                 this.colors[maxChildGroupId] = color;
 
@@ -441,8 +444,8 @@ ZigzagGrouping.prototype.reconcile = function() {
             }
 
             // and here
-            for (var k = 0; k < numCurrentGroups; k++) {
-                var currentGroupId = k;
+            for (var k = 0; k < currentGroupIds; k++) {
+                var currentGroupId = currentGroupIds[k];
                 if (maxChildGroupId != currentGroupId) {
                     //this.groups[currentGroupId] = this.groups[currentGroupId];
                     var hue = randInt(360);
