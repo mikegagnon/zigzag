@@ -274,7 +274,7 @@ var ZigzagGrouping = function(sim) {
 
     for (var i = 0; i <= 1; i++) {
         for (var j = 0; j < sim.numParticles; j++) {
-            this.data[i].groups.push(new Set());
+            this.data[i].groups.push(new BitSet);
             this.data[i].colors.push(undefined);
         }        
     }
@@ -307,7 +307,8 @@ ZigzagGrouping.prototype.update = function() {
 
 // TODO: JS backwards compat
 function setIntersection(a, b) {
-    return new Set([...a].filter(x => b.has(x)));
+    //return new Set([...a].filter(x => b.has(x)));
+    return a.and(b);
 }
 
 ZigzagGrouping.prototype.assignGroups = function() {
@@ -338,7 +339,7 @@ ZigzagGrouping.prototype.assignToGroup = function(particle, groupId) {
         this.colors[groupId] = `hsl(${hue}, 100%, 64%)`;
     }
     
-    this.groups[groupId].add(particle.id);
+    this.groups[groupId].set(particle.id, 1);
 
     // The abstraction violation here seems worth it
     particle.groupId = groupId;
@@ -392,7 +393,7 @@ ZigzagGrouping.prototype.reconcile = function() {
             var previousGroup = this.prevGroups[previousGroupId];
             var intersection = setIntersection(currentGroup, previousGroup);
             // TODO: configurable proportion?
-            if (intersection.size / currentGroup.size > 0.5) {
+            if (intersection.cardinality() / currentGroup.cardinality() > 0.5) {
                 childrenOf[previousGroupId].push(currentGroupId);
                 foundParent = true;
                 break;
