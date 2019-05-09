@@ -25,11 +25,12 @@
 <script>
 
     var width = 700;
-    var height = 300;
+    var height = 200;
     var numRows = Math.floor(0.05 * height);
     var numCols = Math.floor(0.05 * width);
     var numParticles = 1;
     var stepsPerTick = 1;
+    var skipTicks = 60;
 
     new ZigzagSimViz({
         simId: "zz-one",
@@ -41,6 +42,7 @@
         width: width,
         height: height,
         stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
     });
 
 
@@ -59,6 +61,7 @@
     var numCols = Math.floor(0.2 * width);
     var numParticles = Math.floor(numRows * numCols * 0.35);
     var stepsPerTick = 1;
+    var skipTicks = 0;
 
     new ZigzagSimViz({
         simId: "zz1",
@@ -70,6 +73,7 @@
         width: width,
         height: height,
         stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
     });
 
 

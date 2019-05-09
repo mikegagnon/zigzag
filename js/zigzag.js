@@ -93,7 +93,7 @@ var COLOR_WHITE = "white";
 
 var GRID_STROKE = "#ccc";
 
-var FPS = 10;
+var FPS = 30;
 
 P_MOVE = 0;
 P_TURN_LEFT = 1;
@@ -634,6 +634,8 @@ var ZigzagSimViz = function(args) {
     instances[this.simId] = this;
 
     this.stepsPerTick = args.stepsPerTick;
+    this.skipTicks = args.skipTicks;
+    this.skipTickCountDown = this.skipTicks;
     this.simulator = new ZigzagSim(args);
     if (args.grouping) {
         this.grouping = new ZigzagGrouping(this.simulator);
@@ -651,11 +653,16 @@ var ZigzagSimViz = function(args) {
 };
 
 ZigzagSimViz.prototype.eventTick = function(event) {
-    for (var i = 0; i < this.stepsPerTick; i++) {
-        this.simulator.step();
-        if (this.grouping) {
-            this.grouping.update();
+    if (this.skipTickCountDown == 0) {
+        this.skipTickCountDown = this.skipTicks;
+        for (var i = 0; i < this.stepsPerTick; i++) {
+            this.simulator.step();
+            if (this.grouping) {
+                this.grouping.update();
+            }
         }
+    } else {
+        this.skipTickCountDown--;
     }
 
     this.viz.update(this.simulator, this.grouping);
