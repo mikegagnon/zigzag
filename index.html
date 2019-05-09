@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Zigzag</title>
+        <title>Detachable Zigzag Particles</title>
         <link rel="stylesheet" href="style/bootstrap.min.css" />
         <link rel="stylesheet" href="style/style.css" />
         <meta charset="utf-8" />
@@ -13,33 +13,68 @@
     </head>
     <body>
         <main>
-            <h1 style="text-align: center">Zigzag</h1>
-            <br><br>
-            <center>Michael N. Gagnon, 2019</center>
+<h1 style="text-align: center">Detachable Zigzag Particles</h1>
+<br><br>
+<p><center>Michael N. Gagnon</center></p>
+<p><center>May 9, 2019</center></p>
+<p><center><a href="http://michaelgagnon.me">http://michaelgagnon.me</a></center></p>
 
-            <h2>Simulation</h2>
-            <div id="zz1" class="canvas_container"></div>
-            <script>
+<h2>A Zigzag particle</h2>
 
-                var width = 500;
-                var height = 500;
-                var numRows = Math.floor(0.2 * height);
-                var numCols = Math.floor(0.2 * width);
-                var numParticles = Math.floor(numRows * numCols * 0.35);
-                var stepsPerTick = 1;
+<div id="zz-one" class="canvas_container"></div>
+<script>
 
-                new ZigzagSimViz({
-                    simId: "zz1",
-                    play: true,
-                    numRows: numRows,
-                    numCols: numCols,
-                    numParticles: numParticles,
-                    width: width,
-                    height: height,
-                    stepsPerTick: stepsPerTick,
-                });
+    var width = 700;
+    var height = 300;
+    var numRows = Math.floor(0.05 * height);
+    var numCols = Math.floor(0.05 * width);
+    var numParticles = 1;
+    var stepsPerTick = 1;
 
-            </script>
+    new ZigzagSimViz({
+        simId: "zz-one",
+        play: false,
+        grouping: false,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+    });
+
+
+
+</script>
+
+
+
+<h2>Simulation</h2>
+<div id="zz1" class="canvas_container"></div>
+<script>
+
+    var width = 500;
+    var height = 500;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = Math.floor(numRows * numCols * 0.35);
+    var stepsPerTick = 1;
+
+    new ZigzagSimViz({
+        simId: "zz1",
+        play: false,
+        grouping: true,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+    });
+
+
+
+</script>
         </main>
     </body>
 </html>

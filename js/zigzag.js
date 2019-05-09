@@ -610,14 +610,20 @@ ZigzagViz.prototype.update = function(sim, grouping) {
             var simState = sim.matrix[r][c] == null ? STATE_OFF : STATE_ON;
             //if (simState != cell.state) {
                 cell.state = simState;
-                var color = simState == STATE_OFF ? COLOR_WHITE : grouping.colors[sim.matrix[r][c].groupId];
-                if (color === undefined) {
-                    color = "black"; //console.log(1);
+
+                var color;
+                if (grouping) {
+                    color = simState == STATE_OFF ? COLOR_WHITE : grouping.colors[sim.matrix[r][c].groupId];
+                    if (color === undefined) {
+                        color = "black";
+                    }
+                } else {
+                    color = simState == STATE_OFF ? COLOR_WHITE : COLOR_RED;
                 }
+
                 var x = c * this.cellWidth;
                 var y = r * this.cellHeight;
                 cell.shape.graphics.clear().beginFill(color).drawRect(x, y, this.cellWidth, this.cellHeight).endFill();
-            //}
         }
     }
     this.stage.update();
@@ -629,8 +635,11 @@ var ZigzagSimViz = function(args) {
 
     this.stepsPerTick = args.stepsPerTick;
     this.simulator = new ZigzagSim(args);
-    this.grouping = new ZigzagGrouping(this.simulator);
-    //this.grouping.update();
+    if (args.grouping) {
+        this.grouping = new ZigzagGrouping(this.simulator);
+    } else {
+        this.grouping = undefined;
+    }
     this.viz = new ZigzagViz(args);
     this.viz.update(this.simulator, this.grouping);
 
@@ -644,7 +653,9 @@ var ZigzagSimViz = function(args) {
 ZigzagSimViz.prototype.eventTick = function(event) {
     for (var i = 0; i < this.stepsPerTick; i++) {
         this.simulator.step();
-        this.grouping.update();
+        if (this.grouping) {
+            this.grouping.update();
+        }
     }
 
     this.viz.update(this.simulator, this.grouping);
