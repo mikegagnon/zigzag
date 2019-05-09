@@ -149,14 +149,15 @@ Particle.prototype.step = function() {
         } else {
             this.numCollisions += 1;
 
-            // TODO: configurable
-            if (this.numCollisions == 100) {
-                this.numCollisions = 0;
-                this.direction = ROTATE_LEFT[this.direction];
-                // TODO: configurable alternate turning mechanisms
-                this.instructionPointer = 0;
-                return;
-
+            if (this.sim.detachable) {
+                // TODO: configurable
+                if (this.numCollisions == 100) {
+                    this.numCollisions = 0;
+                    this.direction = ROTATE_LEFT[this.direction];
+                    // TODO: configurable alternate turning mechanisms
+                    this.instructionPointer = 0;
+                    return;
+                }
             }
         }
 
@@ -230,6 +231,7 @@ function newMatrix(rows, cols) {
 var ZigzagSim = function(args) {
     this.numRows = args.numRows;
     this.numCols = args.numCols;
+    this.detachable = args.detachable;
     this.numParticles = args.numParticles;
     this.matrix = newMatrix(this.numRows, this.numCols);
     this.particles = [];
