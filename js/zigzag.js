@@ -455,7 +455,7 @@ ZigzagGrouping.prototype.reconcile = function() {
                 if (maxChildGroupId != currentGroupId) {
                     //this.groups[currentGroupId] = this.groups[currentGroupId];
                     var hue = randInt(360);
-                    this.colors[currentGroupId] = "white";//`hsl(${hue}, 100%, 64%)`;
+                    this.colors[currentGroupId] = "black";//`hsl(${hue}, 100%, 64%)`;
                 }
             }
         }
