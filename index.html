@@ -111,7 +111,7 @@
 
 <h2>Lots of zigzag particles</h2>
 
-<p>Now there are lots.</p>
+<p>Now there are lots. See how they cluster.</p>
 
 <div id="zz-lots" class="canvas_container"></div>
 <script>
@@ -139,13 +139,76 @@
     });
 </script>
 
+<h2>Detachable zigzag particles</h2>
 
-<h2>Simulation</h2>
+<p>Here, the behavior of zigzag particles changes. Specifically,
+if a zigzag particle tries and fails to move 100 times in a row, then it turns left, and starts over. This leads to dynamic clustering.</p>
+
+<div id="zz-detach" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = Math.floor(numRows * numCols * 0.35);
+    var stepsPerTick = 1;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-detach",
+        play: false,
+        grouping: false,
+        detachable: true,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+<h2>Lots more detachable zigzag particles</h2>
+
+<p>More particles! And faster!</p>
+
+<div id="zz-lots-more" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.75 * height);
+    var numCols = Math.floor(0.75 * width);
+    var numParticles = Math.floor(numRows * numCols * 0.35);
+    var stepsPerTick = 100;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-lots-more",
+        play: false,
+        grouping: false,
+        detachable: true,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+
+<h2>Colored groups</h2>
+
+<p>Let's color each cluster a different color, to see what's going on. Free solo particles are colored black.</p>
 <div id="zz1" class="canvas_container"></div>
 <script>
 
-    var width = 500;
-    var height = 500;
+    var width = 700;
+    var height = 300;
     var numRows = Math.floor(0.2 * height);
     var numCols = Math.floor(0.2 * width);
     var numParticles = Math.floor(numRows * numCols * 0.35);
@@ -169,6 +232,11 @@
 
 
 </script>
+
+<h2>Conclusion</h2>
+
+<p>This is fun!</p>
+
         </main>
     </body>
 </html>
