@@ -1,43 +1,242 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Zigzag</title>
+        <title>Detachable Zigzag Particles</title>
         <link rel="stylesheet" href="style/bootstrap.min.css" />
         <link rel="stylesheet" href="style/style.css" />
         <meta charset="utf-8" />
         <script type="text/javascript" src="./js/jquery-2.2.4.min.js"></script>
         <script type="text/javascript" src="./js/bootstrap.min.js"></script>
         <script type="text/javascript" src="./js/easeljs-0.8.2.min.js"></script>
+        <script type="text/javascript" src="./js/bitset.js"></script>
         <script type="text/javascript" src="./js/zigzag.js"></script>
-
     </head>
     <body>
         <main>
-            <h1 style="text-align: center">Zigzag</h1>
-            <br><br>
-            <center>Michael N. Gagnon, 2019</center>
+<h1 style="text-align: center">Detachable Zigzag Particles</h1>
+<br><br>
+<p><center>Michael N. Gagnon</center></p>
+<p><center>May 9, 2019</center></p>
+<p><center><a href="http://michaelgagnon.me">http://michaelgagnon.me</a></center></p>
 
-            <h2>Simulation</h2>
-            <div id="zz1" class="canvas_container"></div>
-            <script>
+<h2>A zigzag particle</h2>
 
-                var width = 700;
-                var height = 300;
-                var numRows = Math.floor(0.25 * height);
-                var numCols = Math.floor(0.25 * width);
-                var numParticles = Math.floor(numRows * numCols * 0.35);
-                var stepsPerTick = 200;
+<p>Press the play button. Observe how the zigzag particle (red square) zigzags across the field.</p>
 
-                new ZigzagSimViz({
-                    simId: "zz1",
-                    numRows: numRows,
-                    numCols: numCols,
-                    numParticles: numParticles,
-                    width: width,
-                    height: height,
-                    stepsPerTick: stepsPerTick,
-                });
-            </script>
+<div id="zz-one" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.05 * height);
+    var numCols = Math.floor(0.05 * width);
+    var numParticles = 1;
+    var stepsPerTick = 1;
+    var skipTicks = 60;
+
+    new ZigzagSimViz({
+        simId: "zz-one",
+        play: false,
+        grouping: false,
+        detachable: false,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+<h2>A small zigzag particle</h2>
+
+<p>Press the play button. Now it moves fast.</p>
+
+<div id="zz-small" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = 1;
+    var stepsPerTick = 1;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-small",
+        play: false,
+        grouping: false,
+        detachable: false,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+<h2>Many zigzag particles</h2>
+
+<p>Now there are many. They take turns moving. If one tries to move into a space with another, it doesn't move.</p>
+
+<div id="zz-many" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = 100;
+    var stepsPerTick = 1;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-many",
+        play: false,
+        grouping: false,
+        detachable: false,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+<h2>Lots of zigzag particles</h2>
+
+<p>Now there are lots. See how they cluster.</p>
+
+<div id="zz-lots" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = Math.floor(numRows * numCols * 0.35);
+    var stepsPerTick = 1;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-lots",
+        play: false,
+        grouping: false,
+        detachable: false,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+<h2>Detachable zigzag particles</h2>
+
+<p>Here, the behavior of zigzag particles changes. Specifically,
+if a zigzag particle tries and fails to move 100 times in a row, then it turns left, and starts over. This leads to dynamic clustering.</p>
+
+<div id="zz-detach" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = Math.floor(numRows * numCols * 0.35);
+    var stepsPerTick = 1;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-detach",
+        play: false,
+        grouping: false,
+        detachable: true,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+<h2>Lots more detachable zigzag particles</h2>
+
+<p>More particles! And faster!</p>
+
+<div id="zz-lots-more" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.75 * height);
+    var numCols = Math.floor(0.75 * width);
+    var numParticles = Math.floor(numRows * numCols * 0.35);
+    var stepsPerTick = 100;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-lots-more",
+        play: false,
+        grouping: false,
+        detachable: true,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+
+<h2>Colored groups</h2>
+
+<p>Let's color each cluster a different color, to see what's going on. Free solo particles are colored black.</p>
+<div id="zz1" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 300;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = Math.floor(numRows * numCols * 0.35);
+    var stepsPerTick = 1;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz1",
+        play: false,
+        grouping: true,
+        detachable: true,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+
+
+
+</script>
+
+<h2>Conclusion</h2>
+
+<p>This is fun!</p>
+
         </main>
     </body>
 </html>

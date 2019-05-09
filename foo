@@ -93,7 +93,7 @@ var COLOR_WHITE = "white";
 
 var GRID_STROKE = "#ccc";
 
-var FPS = 30;
+var FPS = 10;
 
 P_MOVE = 0;
 P_TURN_LEFT = 1;
@@ -149,15 +149,14 @@ Particle.prototype.step = function() {
         } else {
             this.numCollisions += 1;
 
-            if (this.sim.detachable) {
-                // TODO: configurable
-                if (this.numCollisions == 100) {
-                    this.numCollisions = 0;
-                    this.direction = ROTATE_LEFT[this.direction];
-                    // TODO: configurable alternate turning mechanisms
-                    this.instructionPointer = 0;
-                    return;
-                }
+            // TODO: configurable
+            if (this.numCollisions == 100) {
+                this.numCollisions = 0;
+                this.direction = ROTATE_LEFT[this.direction];
+                // TODO: configurable alternate turning mechanisms
+                this.instructionPointer = 0;
+                return;
+
             }
         }
 
@@ -231,7 +230,6 @@ function newMatrix(rows, cols) {
 var ZigzagSim = function(args) {
     this.numRows = args.numRows;
     this.numCols = args.numCols;
-    this.detachable = args.detachable;
     this.numParticles = args.numParticles;
     this.matrix = newMatrix(this.numRows, this.numCols);
     this.particles = [];
@@ -254,67 +252,149 @@ ZigzagSim.prototype.step = function() {
     for (var i = 0; i < this.numParticles; i++) {
         this.particles[i].step(this);
     }
-};
+}
 
 var ZigzagGrouping = function(sim) {
     this.sim = sim;
 
-    this.current = 0;
-    this.prev = 1;
-
-    this.data = [
-        {
-            nextGroupId: 0,
-            groups: [],
-            colors: [],
-        },
-        {
-            nextGroupId: 0,
-            groups: [],
-            colors: [],
-        }];
-
-    for (var i = 0; i <= 1; i++) {
-        for (var j = 0; j < sim.numParticles; j++) {
-            this.data[i].groups.push(new BitSet);
-            this.data[i].colors.push(undefined);
-        }        
-    }
-
-    this.groups = this.data[this.current].groups;
-    this.colors = this.data[this.current].colors;
-
+    // this.groups[groupId] = set(particle ids that are members of this group)
+    this.groups = {};
+    this.colors = {};
     this.assignGroups();
-};
+}
 
-ZigzagGrouping.prototype.update = function() {
-
-    if (this.current == 0) {
-        this.current = 1;
-        this.prev = 0;
-    } else {
-        this.current = 0;
-        this.prev = 1;
-    }
-
-    this.groups = this.data[this.current].groups;
-    this.colors = this.data[this.current].colors;
-
-    this.prevGroups = this.data[this.prev].groups;
-    this.prevColors = this.data[this.prev].colors;
-
-    this.assignGroups();
-    this.reconcile();
-};
-
+// TODO: JS backwards compat
 function setIntersection(a, b) {
-    return a.and(b);
+    return new Set([...a].filter(x => b.has(x)));
+}
+
+ZigzagGrouping.prototype.reconcile = function(previousGrouping) {
+
+    var count = 0;
+
+    // childrenOf[previousGroupId] = list of currentGroupIds for the groups
+    // that are descendants of the group indexed by previousGroupId
+    var childrenOf = {};
+
+    var previousGroupIds = Object.keys(previousGrouping.groups);
+    for (var j = 0; j < previousGroupIds.length; j++) {
+        var previousGroupId = previousGroupIds[j];
+        childrenOf[previousGroupId] = [];
+    }
+
+    // list of list of currentGroupIds for the groups that are not contained in
+    // childrenOf
+    var orphans = [];
+
+    //for (var i = 0; i < this.nextGroupNum; i++) {
+    var currentGroupIds = Object.keys(this.groups);
+    for (var i = 0; i < currentGroupIds.length; i++) {
+        
+        var currentGroupId = currentGroupIds[i];
+        var currentGroup = this.groups[currentGroupId];
+        var foundParent = false;
+
+        for (var j = 0; j < previousGroupIds.length; j++) {
+            var previousGroupId = previousGroupIds[j];
+            var previousGroup = previousGrouping.groups[previousGroupId];
+            var intersection = setIntersection(currentGroup, previousGroup);
+            // TODO: configurable proportion?
+            if (intersection.size / currentGroup.size > 0.5) {
+                childrenOf[previousGroupId].push(currentGroupId);
+                foundParent = true;
+                break;
+            }
+        }
+
+        if (!foundParent) {
+            orphans.push(currentGroupId);
+        }
+    }
+
+    var groups = {};
+    var colors = {};
+
+    for (var j = 0; j < previousGroupIds.length; j++) {
+        var previousGroupId = previousGroupIds[j];
+        if (previousGroupId in childrenOf) {
+            var currentGroupIds = childrenOf[previousGroupId];
+            var maxChildGroupId = undefined;
+
+            for (var k = 0; k < currentGroupIds.length; k++) {
+                var currentGroupId = currentGroupIds[k];
+                if (maxChildGroupId === undefined || this.groups[currentGroupId].size > this.groups[maxChildGroupId].size) {
+                    maxChildGroupId = currentGroupId;
+                }
+            }
+
+            // magic happens here
+            if (maxChildGroupId !== undefined) {
+                groups[previousGroupId] = this.groups[maxChildGroupId];
+                var color;
+                //if (this.colors[maxChildGroupId] === undefined) {
+                //    var hue = randInt(360);
+                //    color = `hsl(${hue}, 100%, 64%)`;
+                //} else {
+                //    color = this.colors[maxChildGroupId];
+                //}
+                //color = previousGrouping.colors[previousGroupId];
+                
+
+                /*if (previousGrouping.colors[previousGroupId] === undefined) {
+                    var hue = randInt(360);
+                    color = `hsl(${hue}, 100%, 64%)`;
+                } else {
+                    color = previousGrouping.colors[previousGroupId];
+                }*/
+                
+                color = previousGrouping.colors[previousGroupId];
+
+                if (color === undefined) {
+                    console.log(1);
+                }
+                
+                colors[previousGroupId] = color;
+
+                var particleIds = [...groups[previousGroupId]];
+                for (var k = 0; k < particleIds.length; k++) {
+                    var pid = particleIds[k];
+                    this.sim.particles[pid].groupId = previousGroupId;
+                }
+
+                //console.log(1);
+                count++;
+            }
+
+            // and here
+            for (var k = 0; k < currentGroupIds.length; k++) {
+                var currentGroupId = currentGroupIds[k];
+                if (maxChildGroupId != currentGroupId) {
+                    groups[currentGroupId] = this.groups[currentGroupId];
+                    var hue = randInt(360);
+                    colors[currentGroupId] = `hsl(${hue}, 100%, 64%)`;
+                    count++;
+                }
+            }
+        }
+    }
+
+    // and here
+    for (var i = 0; i < orphans.length; i++) {
+        var orphanGroupId = orphans[i];
+        groups[orphanGroupId] = this.groups[orphanGroupId];
+        var hue = randInt(360);
+        colors[orphanGroupId] = `hsl(${hue}, 100%, 64%)`;
+        count++;
+    }
+
+    return {
+        groups: groups,
+        colors: colors
+    };
+
 }
 
 ZigzagGrouping.prototype.assignGroups = function() {
-
-    this.data[this.current].nextGroupId = 0;
-
     for (var i = 0; i < this.sim.numParticles; i++) {
         this.sim.particles[i].groupId = undefined;
     }
@@ -330,16 +410,13 @@ ZigzagGrouping.prototype.assignToGroup = function(particle, groupId) {
     }
 
     if (groupId === undefined) {
-        groupId = this.data[this.current].nextGroupId;
-        this.data[this.current].nextGroupId++;
-
-        this.groups[groupId].clear();
-
+        groupId = randInt(Number.MAX_SAFE_INTEGER);
+        this.groups[groupId] = new Set();
         var hue = randInt(360);
         this.colors[groupId] = `hsl(${hue}, 100%, 64%)`;
     }
     
-    this.groups[groupId].set(particle.id, 1);
+    this.groups[groupId].add(particle.id);
 
     // The abstraction violation here seems worth it
     particle.groupId = groupId;
@@ -361,117 +438,6 @@ ZigzagGrouping.prototype.assignToGroup = function(particle, groupId) {
             this.assignToGroup(p, particle.groupId);
         }
     }
-
-    if (this.groups[groupId].cardinality() == 1) {
-        this.data[this.current].nextGroupId--;
-        //this.colors[groupId] = undefined;
-        particle.groupId = undefined;
-    }
-
-}
-
-ZigzagGrouping.prototype.reconcile = function() {
-
-    // childrenOf[previousGroupId] = list of currentGroupIds for the groups
-    // that are descendants of the group indexed by previousGroupId
-    var childrenOf = [];
-
-    var numPreviousGroups = this.data[this.prev].nextGroupId;
-    var numCurrentGroups = this.data[this.current].nextGroupId;
-
-    //var previousGroupIds = Object.keys(previousGrouping.groups);
-    for (var j = 0; j < numPreviousGroups; j++) {
-        childrenOf[j] = [];
-    }
-
-    // list of list of currentGroupIds for the groups that are not contained in
-    // childrenOf
-    var orphans = [];
-
-    for (var i = 0; i < numCurrentGroups; i++) {
-        
-        var currentGroupId = i;
-        var currentGroup = this.groups[currentGroupId];
-        var foundParent = false;
-
-        for (var j = 0; j < numPreviousGroups; j++) {
-            var previousGroupId = j;
-            var previousGroup = this.prevGroups[previousGroupId];
-            var intersection = setIntersection(currentGroup, previousGroup);
-            // TODO: configurable proportion?
-            if (intersection.cardinality() / currentGroup.cardinality() > 0.5) {
-                childrenOf[previousGroupId].push(currentGroupId);
-                foundParent = true;
-                break;
-            }
-        }
-
-        if (!foundParent) {
-            orphans.push(currentGroupId);
-        }
-    }
-
-    //var groups = {};
-    //var colors = {};
-
-    for (var j = 0; j < numPreviousGroups; j++) {
-        var previousGroupId = j;
-        if (true) {//(previousGroupId in childrenOf) {
-            var currentGroupIds = childrenOf[previousGroupId];
-            var maxChildGroupId = undefined;
-
-            for (var k = 0; k < currentGroupIds.length; k++) {
-                var currentGroupId = currentGroupIds[k];
-                if (maxChildGroupId === undefined || this.groups[currentGroupId].size > this.groups[maxChildGroupId].size) {
-                    maxChildGroupId = currentGroupId;
-                }
-            }
-
-            // magic happens here
-            if (maxChildGroupId !== undefined) {
-                //this.groups[previousGroupId] = this.groups[maxChildGroupId];
-                var color;
-                
-                color = this.prevColors[previousGroupId];
-
-                if (color === undefined) {
-                    console.error("color undefined");
-                }
-
-                //console.log("current", this.groups[maxChildGroupId]);
-                //console.log("prev", this.prevGroups[previousGroupId]);
-                
-                this.colors[maxChildGroupId] = color;
-
-                /*var particleIds = [...this.groups[maxChildGroupId]];
-                for (var k = 0; k < particleIds.length; k++) {
-                    var pid = particleIds[k];
-                    //this.sim.particles[pid].groupId = previousGroupId;
-                }*/
-
-            }
-
-            // and here
-            for (var k = 0; k < currentGroupIds; k++) {
-                var currentGroupId = currentGroupIds[k];
-                if (maxChildGroupId != currentGroupId) {
-                    //this.groups[currentGroupId] = this.groups[currentGroupId];
-                    var hue = randInt(360);
-                    this.colors[currentGroupId] = "black";//`hsl(${hue}, 100%, 64%)`;
-                }
-            }
-        }
-    }
-
-    // and here
-    for (var i = 0; i < orphans.length; i++) {
-        var orphanGroupId = orphans[i];
-        //this.groups[orphanGroupId] = this.groups[orphanGroupId];
-        var hue = randInt(360);
-        this.colors[orphanGroupId] = `hsl(${hue}, 100%, 64%)`;
-    }
-
-    
 
 }
 
@@ -612,20 +578,14 @@ ZigzagViz.prototype.update = function(sim, grouping) {
             var simState = sim.matrix[r][c] == null ? STATE_OFF : STATE_ON;
             //if (simState != cell.state) {
                 cell.state = simState;
-
-                var color;
-                if (grouping) {
-                    color = simState == STATE_OFF ? COLOR_WHITE : grouping.colors[sim.matrix[r][c].groupId];
-                    if (color === undefined) {
-                        color = "black";
-                    }
-                } else {
-                    color = simState == STATE_OFF ? COLOR_WHITE : COLOR_RED;
+                var color = simState == STATE_OFF ? COLOR_WHITE : grouping.colors[sim.matrix[r][c].groupId];
+                if (color === undefined) {
+                    color = "black"; //console.log(1);
                 }
-
                 var x = c * this.cellWidth;
                 var y = r * this.cellHeight;
                 cell.shape.graphics.clear().beginFill(color).drawRect(x, y, this.cellWidth, this.cellHeight).endFill();
+            //}
         }
     }
     this.stage.update();
@@ -636,14 +596,8 @@ var ZigzagSimViz = function(args) {
     instances[this.simId] = this;
 
     this.stepsPerTick = args.stepsPerTick;
-    this.skipTicks = args.skipTicks;
-    this.skipTickCountDown = this.skipTicks;
     this.simulator = new ZigzagSim(args);
-    if (args.grouping) {
-        this.grouping = new ZigzagGrouping(this.simulator);
-    } else {
-        this.grouping = undefined;
-    }
+    this.grouping = new ZigzagGrouping(this.simulator);
     this.viz = new ZigzagViz(args);
     this.viz.update(this.simulator, this.grouping);
 
@@ -653,22 +607,6 @@ var ZigzagSimViz = function(args) {
         this.clickPlayPause();
     }
 };
-
-ZigzagSimViz.prototype.eventTick = function(event) {
-    if (this.skipTickCountDown == 0) {
-        this.skipTickCountDown = this.skipTicks;
-        for (var i = 0; i < this.stepsPerTick; i++) {
-            this.simulator.step();
-            if (this.grouping) {
-                this.grouping.update();
-            }
-        }
-    } else {
-        this.skipTickCountDown--;
-    }
-
-    this.viz.update(this.simulator, this.grouping);
-}
 
 ZigzagSimViz.prototype.clickPlayPause = function() {
     if (this.paused) {
@@ -694,3 +632,15 @@ ZigzagSimViz.prototype.clickPlayPause = function() {
         $("#" + this.simId + "-play-pause-button").attr("class", "glyphicon glyphicon-play");
     }
 };
+
+ZigzagSimViz.prototype.eventTick = function(event) {
+    for (var i = 0; i < this.stepsPerTick; i++) {
+        this.simulator.step();
+        var grouping = new ZigzagGrouping(this.simulator);
+        this.grouping = grouping.reconcile(this.grouping);
+    }
+
+    this.viz.update(this.simulator, this.grouping);
+}
+
+
