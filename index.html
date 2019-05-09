@@ -19,7 +19,9 @@
 <p><center>May 9, 2019</center></p>
 <p><center><a href="http://michaelgagnon.me">http://michaelgagnon.me</a></center></p>
 
-<h2>A Zigzag particle</h2>
+<h2>A zigzag particle</h2>
+
+<p>Press the play button. Observe how the zigzag particle (red square) zigzags across the field.</p>
 
 <div id="zz-one" class="canvas_container"></div>
 <script>
@@ -44,11 +46,94 @@
         stepsPerTick: stepsPerTick,
         skipTicks: skipTicks,
     });
-
-
-
 </script>
 
+<h2>A small zigzag particle</h2>
+
+<p>Press the play button. Now it moves fast.</p>
+
+<div id="zz-small" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = 1;
+    var stepsPerTick = 1;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-small",
+        play: false,
+        grouping: false,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+<h2>Many zigzag particles</h2>
+
+<p>Now there are many. They take turns moving. If one tries to move into a space with another, it doesn't move.</p>
+
+<div id="zz-many" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = 100;
+    var stepsPerTick = 1;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-many",
+        play: false,
+        grouping: false,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
+
+<h2>Lots of zigzag particles</h2>
+
+<p>Now there are lots.</p>
+
+<div id="zz-lots" class="canvas_container"></div>
+<script>
+
+    var width = 700;
+    var height = 200;
+    var numRows = Math.floor(0.2 * height);
+    var numCols = Math.floor(0.2 * width);
+    var numParticles = Math.floor(numRows * numCols * 0.35);
+    var stepsPerTick = 1;
+    var skipTicks = 0;
+
+    new ZigzagSimViz({
+        simId: "zz-lots",
+        play: false,
+        grouping: false,
+        numRows: numRows,
+        numCols: numCols,
+        numParticles: numParticles,
+        width: width,
+        height: height,
+        stepsPerTick: stepsPerTick,
+        skipTicks: skipTicks,
+    });
+</script>
 
 
 <h2>Simulation</h2>
